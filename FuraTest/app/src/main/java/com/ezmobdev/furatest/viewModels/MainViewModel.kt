@@ -14,7 +14,6 @@ class MainViewModel : ViewModel() {
     lateinit var furaRepo: IRepo
 
     val furaPointersData: MutableLiveData<FuraResponse> by lazy { MutableLiveData<FuraResponse>() }
-
     val isLoading = ObservableField(true)
 
     @SuppressLint("CheckResult")
