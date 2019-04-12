@@ -7,6 +7,8 @@ import com.ezmobdev.furatest.R
 import com.ezmobdev.furatest.databinding.ActivityMapsBinding
 import com.ezmobdev.furatest.viewModels.MainViewModel
 import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
 
 
 class MapsActivity : BaseMapActivity<ActivityMapsBinding, MainViewModel>(R.layout.activity_maps) {
@@ -14,15 +16,28 @@ class MapsActivity : BaseMapActivity<ActivityMapsBinding, MainViewModel>(R.layou
     override fun onCreateComplete(savedInstanceState: Bundle?) {
         mapView = binding.mapView
         initMap(savedInstanceState)
-
         viewModel = initViewModel()
+        App.instance.getAppComponent().inject(viewModel)
+        viewModel.loadLocation()
         binding.viewModel = viewModel
-        App.instance.getAppComponent().inject(binding.viewModel!!)
 
 
-        viewModel.loadData()
+        viewModel.myLocData.observe(this,
+            Observer{
+                it?.let {latLng->
+                    val loc = LatLng(latLng.latitude, latLng.longitude)
+                    mMap?.addMarker(
+                        MarkerOptions()
+                            .position(loc)
+                            .title("Вы тут"))
+                    mMap?.animateCamera(CameraUpdateFactory.newLatLngZoom(loc, 5.0f))
+               }
+            }
+        )
+
         viewModel.furaPointersData.observe(this,
             Observer { markers ->
+                mMap?.clear()
                 if (mMap!=null && markers!=null){
                     for (point in markers.data)
                         mMap?.addMarker(point.getMarker())
